@@ -4,23 +4,46 @@
 
 use actix_web::{
     middleware::{Compress, Logger, NormalizePath, TrailingSlash},
-    web::scope,
+    web::{scope, Data},
     App, HttpServer,
 };
+use dotenv::var;
 use log::info;
+use sqlx::{migrate, PgPool};
 
 mod core;
 mod management;
 
+struct AppData {
+    pub _db: PgPool,
+}
+
 pub async fn coniunctio_run() {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     info!("{}", build_info());
+
+    let postgres_connection_string =
+        var("DATABASE_URL").expect("env variable `DATABASE_URL` must be set");
+
+    let postgres = PgPool::connect(&postgres_connection_string)
+        .await
+        .expect("cannot connect to PostgreSQL");
+    info!("connected to database");
+
+    migrate!("./migrations")
+        .run(&postgres)
+        .await
+        .expect("database migrations failed");
+    info!("applied migrations");
 
     HttpServer::new(move || {
         App::new()
             .wrap(Compress::default())
             .wrap(Logger::default())
             .wrap(NormalizePath::new(TrailingSlash::Trim))
+            .app_data(Data::new(AppData {
+                _db: postgres.clone(),
+            }))
             .service(scope("manage").configure(management::configure))
             .service(core::coniunctio)
     })

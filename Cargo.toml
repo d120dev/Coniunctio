@@ -1,6 +1,13 @@
 [package]
 name = "coniunctio"
-version = "0.1.0"
+version = "0.0.0-wip"
 edition = "2021"
+repository = "https://github.com/d120dev/Coniunctio"
+license = "EUPL-1.2"
+publish = false
 
 [dependencies]
+actix-web = "4.5.1"
+dotenv = "0.15.0"
+env_logger = "0.11.3"
+log = "0.4.21"

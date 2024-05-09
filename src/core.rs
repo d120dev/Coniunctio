@@ -13,34 +13,7 @@ pub async fn coniunctio(path: Path<(String, String)>) -> impl Responder {
     HttpResponse::Ok()
 }
 
-pub struct Scope {
-    id: u32,
-    url_prefix: String,
-    policies: HashSet<Policies>,
-}
-
-pub struct ObjectCommon {
-    id: u32,
-    url: String,
-    warn_extern: bool,
-    enforce_login: bool,
-}
-
-pub struct TreeEntry {
-    target: String,
-}
-
-pub enum Objects {
-    Redirect {
-        common: ObjectCommon,
-        target: String,
-    },
-    LinkTree {
-        common: ObjectCommon,
-        tree_entries: Vec<String>,
-    },
-}
-
+#[derive(PartialEq, Eq, Hash)]
 pub enum Policies {
     ForbidExtern,
     WarnExtern,
